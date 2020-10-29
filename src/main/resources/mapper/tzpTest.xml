@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tzp.test.shardingjdbc_test.dao.mapper.TzpTestDao">
+
+    <sql id="table_column">
+        id,phone,name
+    </sql>
+
+    <sql id="table_name">
+        tzp_test
+    </sql>
+
+    <sql id="where_condition">
+        <where>
+            <if test="id != null "><![CDATA[AND id = #{id}]]></if>
+            <if test="phone != null and phone != '' "><![CDATA[AND phone = #{phone}]]></if>
+            <if test="name != null and name != '' "><![CDATA[AND name = #{name}]]></if>
+            <!-- 其他查询条件通过queryData拓展实现 -->
+        </where>
+    </sql>
+
+    <sql id="page_limit">
+        <if test="startIndex != null and startIndex &gt;= 0 and pageSize != null and pageSize &gt; 0"><![CDATA[LIMIT #{startIndex},#{pageSize}]]></if>
+    </sql>
+
+    <sql id="batch_update_set_column">
+        <set>
+            <if test="id != null "><![CDATA[id = #{item.id},]]></if>
+            <if test="phone != null and phone != '' "><![CDATA[phone = #{item.phone},]]></if>
+            <if test="name != null and name != '' "><![CDATA[name = #{item.name},]]></if>
+        </set>
+    </sql>
+
+    <sql id="batch_insert_value">
+            #{item.id},
+			#{item.phone},
+			#{item.name}
+    </sql>
+    
+    <select id="selectListByCondition" parameterType="tzpTest" resultType="tzpTest">
+        select <include refid="table_column"/>
+        from <include refid="table_name"/>
+        <include refid="where_condition"/>
+        <include refid="page_limit"/>
+    </select>
+
+    <select id="selectCountByConditon" parameterType="tzpTest" resultType="int">
+        select count(*)
+        from <include refid="table_name"/>
+        <include refid="where_condition"/>
+    </select>
+
+    <insert id="batchInsertEntry" parameterType="tzpTest">
+		INSERT INTO <include refid="table_name"/> (
+            <include refid="table_column"/>
+        ) VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+                <include refid="batch_insert_value"/>
+            )
+        </foreach>
+    </insert>
+
+</mapper>
